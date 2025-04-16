@@ -24,11 +24,13 @@ import {
 } from 'constants/ThemeConstant';
 import utils from 'utils';
 import { useThemeSwitcher } from "react-css-theme-switcher";
+import { useLocation } from 'react-router-dom';
 
 const { Content } = Layout;
 const { useBreakpoint } = Grid;
 
-export const AppLayout = ({ navCollapsed, navType, location, direction }) => {
+export const AppLayout = ({ navCollapsed, navType, direction }) => {
+  const location = useLocation();
   const currentRouteInfo = utils.getRouteInfo(navigationConfig, location.pathname)
   const screens = utils.getBreakPoint(useBreakpoint());
   const isMobile = screens.length === 0 ? false : !screens.includes('lg')

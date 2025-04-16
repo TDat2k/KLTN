@@ -1,0 +1,97 @@
+@startuml full_ERD
+' Sơ đồ ERD cho hệ thống tuyển dụng
+skinparam linetype ortho
+
+entity JobTitle {
+    * id : UUID
+    --
+    * name : String
+    * code : String
+    descriptions : Text
+}
+entity JobType {
+    * id : UUID
+    --
+    * name : String
+    * code : String
+    descriptions : Text
+}
+entity Department {
+    * id : UUID
+    --
+    * name : String
+    * code : String
+    descriptions : Text
+}
+entity RecruitmentProposal {
+    * id : UUID
+    --
+    * code : String
+    * title : String
+    * job_descriptions : Text
+    * skills_requirements : Text
+    * quantity : Integer
+    * start_date : Date
+    * end_date : Date
+    * work_location : String
+    * status : Enum
+    * job_title_id : UUID <<FK>>
+    * job_type_id : UUID <<FK>>
+    * department_id : UUID <<FK>>
+    salary_range : String
+    benefits : Text
+}
+entity JobPost {
+    * id : UUID
+    --
+    * code : String
+    * title : String
+    * job_descriptions : Text
+    * skills_requirements : Text
+    * quantity : Integer
+    * end_date : Date
+    * work_location : String
+    * recruitment_proposal_id : UUID <<FK>>
+    * job_title_id : UUID <<FK>>
+    * job_type_id : UUID <<FK>>
+    salary_range : String
+    benefits : Text
+}
+entity RecruitmentProposalHistory {
+    * id : UUID
+    --
+    * status : Enum
+    * change_at : DateTime
+    * recruitment_proposal_id : UUID <<FK>>
+}
+entity Candidates {
+    * id : UUID
+    --
+    * full_name : String
+    * email : String
+    * phone_number : String
+    gender : Enum
+    dob : Date
+    * job_post_id : UUID <<FK>>
+}
+entity Attachment {
+    * id : UUID
+    --
+    * file_name : String
+    * file_path : String
+    * candidate_id : UUID <<FK>>
+    file_type : Enum
+}
+
+' Định nghĩa các mối quan hệ (N:1)
+JobTitle    ||--o{ RecruitmentProposal
+JobType     ||--o{ RecruitmentProposal
+Department  ||--o{ RecruitmentProposal
+RecruitmentProposal ||--o{ JobPost
+JobTitle    ||--o{ JobPost
+JobType     ||--o{ JobPost
+JobPost     ||--o{ Candidates
+Candidates  ||--o{ Attachment
+RecruitmentProposal ||--o{ RecruitmentProposalHistory
+
+@enduml

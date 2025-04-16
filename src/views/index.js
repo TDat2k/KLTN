@@ -1,64 +1,68 @@
 import React from "react";
-import { Route, Switch, Redirect, withRouter } from "react-router-dom";
+import { Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { connect } from "react-redux";
 import AppLayout from "layouts/app-layout";
-import AuthLayout from 'layouts/auth-layout';
+import AuthLayout from "layouts/auth-layout";
 import AppLocale from "lang";
 import { IntlProvider } from "react-intl";
-import { ConfigProvider } from 'antd';
-import { APP_PREFIX_PATH, AUTH_PREFIX_PATH } from 'configs/AppConfig'
-import useBodyClass from 'hooks/useBodyClass';
+import { ConfigProvider } from "antd";
+import { APP_PREFIX_PATH, AUTH_PREFIX_PATH } from "configs/AppConfig";
+import useBodyClass from "hooks/useBodyClass";
 
-function RouteInterceptor({ children, isAuthenticated, ...rest }) {
-  return (
-    <Route
-      {...rest}
-      render={({ location }) =>
-        isAuthenticated ? (
-          children
-        ) : (
-          <Redirect
-            to={{
-              pathname: AUTH_PREFIX_PATH,
-              state: { from: location }
-            }}
-          />
-        )
-      }
-    />
-  );
+//test
+import ClientSide from "./client-views";
+
+// Route interceptor cho các route cần xác thực
+function ProtectedRoute({ isAuthenticated, children }) {
+  const location = useLocation();
+  if (!isAuthenticated) {
+    return (
+      <Navigate to={AUTH_PREFIX_PATH} state={{ from: location }} replace />
+    );
+  }
+  return children;
 }
 
-export const Views = (props) => {
-  const { locale, token, location, direction } = props;
+const Views = (props) => {
+  const { locale, token, direction } = props;
   const currentAppLocale = AppLocale[locale];
+
   useBodyClass(`dir-${direction}`);
+
   return (
     <IntlProvider
       locale={currentAppLocale.locale}
-      messages={currentAppLocale.messages}>
+      messages={currentAppLocale.messages}
+    >
       <ConfigProvider locale={currentAppLocale.antd} direction={direction}>
-        <Switch>
-          <Route exact path="/">
-            <Redirect to={APP_PREFIX_PATH} />
-          </Route>
-          <Route path={AUTH_PREFIX_PATH}>
-            <AuthLayout direction={direction} />
-          </Route>
-          <RouteInterceptor path={APP_PREFIX_PATH} isAuthenticated={token}>
-            <AppLayout direction={direction} location={location}/>
-          </RouteInterceptor>
-        </Switch>
+        <Routes>
+          {/* <Route path="/" element={<Navigate to={APP_PREFIX_PATH} replace />} />
+
+          <Route
+            path={`${AUTH_PREFIX_PATH}/*`}
+            element={<AuthLayout direction={direction} />}
+          />
+
+          <Route
+            path={`${APP_PREFIX_PATH}/*`}
+            element={
+              // <ProtectedRoute isAuthenticated={token}>
+              <AppLayout direction={direction} />
+              // </ProtectedRoute>
+            }
+          /> */}
+
+          <Route path="/" element={<ClientSide />} />
+        </Routes>
       </ConfigProvider>
     </IntlProvider>
-  )
-}
-
-
-const mapStateToProps = ({ theme, auth }) => {
-  const { locale, direction } =  theme;
-  const { token } = auth;
-  return { locale, direction, token }
+  );
 };
 
-export default withRouter(connect(mapStateToProps)(Views));
+const mapStateToProps = ({ theme, auth }) => {
+  const { locale, direction } = theme;
+  const { token } = auth;
+  return { locale, direction, token };
+};
+
+export default connect(mapStateToProps)(Views);
